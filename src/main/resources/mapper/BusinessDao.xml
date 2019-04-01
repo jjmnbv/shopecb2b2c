@@ -1,0 +1,431 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.shopec.dao.BusinessDao">
+
+    <!-- 开启二级缓存 -->
+    <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>
+	
+	<!-- User查询映射结果 -->
+    <resultMap id="UserResultMap" type="net.shopec.entity.User">
+	    <result column="id" property="id" />
+	    <result column="version" property="version" />
+        <result column="created_date" property="createdDate" />
+        <result column="last_modified_date" property="lastModifiedDate" />
+        <result column="is_enabled" property="isEnabled" />
+        <result column="is_locked" property="isLocked" />
+        <result column="last_login_date" property="lastLoginDate" />
+        <result column="last_login_ip" property="lastLoginIp" />
+        <result column="lock_date" property="lockDate" />
+    </resultMap>
+    
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="net.shopec.entity.Business" extends="UserResultMap">
+    	<result column="id" property="id" />
+        <result column="attribute_value0" property="attributeValue0" />
+        <result column="attribute_value1" property="attributeValue1" />
+        <result column="attribute_value10" property="attributeValue10" />
+        <result column="attribute_value11" property="attributeValue11" />
+        <result column="attribute_value12" property="attributeValue12" />
+        <result column="attribute_value13" property="attributeValue13" />
+        <result column="attribute_value14" property="attributeValue14" />
+        <result column="attribute_value15" property="attributeValue15" />
+        <result column="attribute_value16" property="attributeValue16" />
+        <result column="attribute_value17" property="attributeValue17" />
+        <result column="attribute_value18" property="attributeValue18" />
+        <result column="attribute_value19" property="attributeValue19" />
+        <result column="attribute_value2" property="attributeValue2" />
+        <result column="attribute_value3" property="attributeValue3" />
+        <result column="attribute_value4" property="attributeValue4" />
+        <result column="attribute_value5" property="attributeValue5" />
+        <result column="attribute_value6" property="attributeValue6" />
+        <result column="attribute_value7" property="attributeValue7" />
+        <result column="attribute_value8" property="attributeValue8" />
+        <result column="attribute_value9" property="attributeValue9" />
+        <result column="balance" property="balance" />
+        <result column="bank_account" property="bankAccount" />
+        <result column="bank_name" property="bankName" />
+        <result column="email" property="email" />
+        <result column="encoded_password" property="encodedPassword" />
+        <result column="frozen_fund" property="frozenFund" />
+        <result column="id_card" property="idCard" />
+        <result column="id_card_image" property="idCardImage" />
+        <result column="identification_number" property="identificationNumber" />
+        <result column="legal_person" property="legalPerson" />
+        <result column="license_image" property="licenseImage" />
+        <result column="license_number" property="licenseNumber" />
+        <result column="mobile" property="mobile" />
+        <result column="name" property="name" />
+        <result column="organization_code" property="organizationCode" />
+        <result column="organization_image" property="organizationImage" />
+        <result column="phone" property="phone" />
+        <result column="safe_key_expire" property="safeKey.expire" />
+        <result column="safe_key_value" property="safeKey.value" />
+        <result column="tax_image" property="taxImage" />
+        <result column="username" property="username" />
+        <association property="store" select="net.shopec.dao.StoreDao.findByAttribute" column="{attributeName=business_id, attributeValue=id}" javaType="net.shopec.entity.Store" fetchType="lazy"/>
+        <collection property="cashes" select="net.shopec.dao.CashDao.findSet" column="{attributeName=business_id, attributeValue=id}" ofType="net.shopec.entity.Cash" fetchType="lazy"/>
+        <collection property="businessDepositLogs" select="net.shopec.dao.BusinessDepositLogDao.findSet" column="{attributeName=business_id, attributeValue=id}" ofType="net.shopec.entity.BusinessDepositLog" fetchType="lazy"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+    	business.id ,
+		business.attribute_value0 ,
+		business.attribute_value1 ,
+		business.attribute_value10 ,
+		business.attribute_value11 ,
+		business.attribute_value12 ,
+		business.attribute_value13 ,
+		business.attribute_value14 ,
+		business.attribute_value15 ,
+		business.attribute_value16 ,
+		business.attribute_value17 ,
+		business.attribute_value18 ,
+		business.attribute_value19 ,
+		business.attribute_value2 ,
+		business.attribute_value3 ,
+		business.attribute_value4 ,
+		business.attribute_value5 ,
+		business.attribute_value6 ,
+		business.attribute_value7 ,
+		business.attribute_value8 ,
+		business.attribute_value9 ,
+		business.balance ,
+		business.bank_account ,
+		business.bank_name ,
+		business.email ,
+		business.encoded_password ,
+		business.frozen_fund ,
+		business.id_card ,
+		business.id_card_image ,
+		business.identification_number ,
+		business.legal_person ,
+		business.license_image ,
+		business.license_number ,
+		business.mobile ,
+		business.name ,
+		business.organization_code ,
+		business.organization_image ,
+		business.phone ,
+		business.safe_key_expire ,
+		business.safe_key_value ,
+		business.tax_image ,
+		business.username ,
+		users.id ,
+		users.version ,
+		users.created_date ,
+		users.last_modified_date ,
+		users.is_enabled ,
+		users.is_locked ,
+		users.last_login_date ,
+		users.last_login_ip ,
+		users.lock_date ,
+		'business_id'
+    </sql>
+
+	<!-- 查找实体对象 -->
+	<select id="find" parameterType="java.lang.Long" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`business` business
+		LEFT JOIN `users` users ON business.`id` = users.`id`
+		WHERE
+			business.`id` = #{id}
+	</select>
+	
+	<!-- 查找所有商家 -->
+	<select id="findAll" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`business` business
+		LEFT JOIN `users` users ON business.`id` = users.`id`
+	</select>
+	
+	<!-- 根据属性查找实体对象 -->
+	<select id="findByAttribute" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`business` business
+		LEFT JOIN `users` users ON business.`id` = users.`id`
+		WHERE
+			${attributeName } = #{attributeValue}
+	</select>
+	
+	<!-- 查找实体对象分页 -->
+	<select id="selectPage" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`business` business
+		LEFT JOIN `users` users ON business.`id` = users.`id`
+		<where>
+		  ${ew.sqlSegment}
+		</where>
+	</select>
+	
+	<!-- 保存 -->
+	<insert id="save" parameterType="net.shopec.entity.Business">
+    	INSERT INTO business(
+			id ,
+			attribute_value0 ,
+			attribute_value1 ,
+			attribute_value10 ,
+			attribute_value11 ,
+			attribute_value12 ,
+			attribute_value13 ,
+			attribute_value14 ,
+			attribute_value15 ,
+			attribute_value16 ,
+			attribute_value17 ,
+			attribute_value18 ,
+			attribute_value19 ,
+			attribute_value2 ,
+			attribute_value3 ,
+			attribute_value4 ,
+			attribute_value5 ,
+			attribute_value6 ,
+			attribute_value7 ,
+			attribute_value8 ,
+			attribute_value9 ,
+			balance ,
+			bank_account ,
+			bank_name ,
+			email ,
+			encoded_password ,
+			frozen_fund ,
+			id_card ,
+			id_card_image ,
+			identification_number ,
+			legal_person ,
+			license_image ,
+			license_number ,
+			mobile ,
+			name ,
+			organization_code ,
+			organization_image ,
+			phone ,
+			safe_key_expire ,
+			safe_key_value ,
+			tax_image ,
+			username
+		) VALUES (
+			#{entity.id}, 
+			#{entity.attributeValue0}, 
+			#{entity.attributeValue1}, 
+			#{entity.attributeValue10}, 
+			#{entity.attributeValue11}, 
+			#{entity.attributeValue12}, 
+			#{entity.attributeValue13}, 
+			#{entity.attributeValue14}, 
+			#{entity.attributeValue15}, 
+			#{entity.attributeValue16}, 
+			#{entity.attributeValue17}, 
+			#{entity.attributeValue18}, 
+			#{entity.attributeValue19}, 
+			#{entity.attributeValue2}, 
+			#{entity.attributeValue3}, 
+			#{entity.attributeValue4}, 
+			#{entity.attributeValue5}, 
+			#{entity.attributeValue6}, 
+			#{entity.attributeValue7}, 
+			#{entity.attributeValue8}, 
+			#{entity.attributeValue9}, 
+			#{entity.balance}, 
+			#{entity.bankAccount}, 
+			#{entity.bankName}, 
+			#{entity.email}, 
+			#{entity.encodedPassword}, 
+			#{entity.frozenFund}, 
+			#{entity.idCard}, 
+			#{entity.idCardImage}, 
+			#{entity.identificationNumber}, 
+			#{entity.legalPerson}, 
+			#{entity.licenseImage}, 
+			#{entity.licenseNumber}, 
+			#{entity.mobile}, 
+			#{entity.name}, 
+			#{entity.organizationCode}, 
+			#{entity.organizationImage}, 
+			#{entity.phone}, 
+			#{entity.safeKey.expire}, 
+			#{entity.safeKey.value}, 
+			#{entity.taxImage}, 
+			#{entity.username})
+ 	</insert>
+	
+	<!-- 更新 -->
+	<update id="update" parameterType="map">
+		UPDATE business
+	    <set>
+	      <if test="entity.attributeValue0 != null">
+	        attribute_value0 = #{entity.attributeValue0},
+	      </if>
+	      <if test="entity.attributeValue1 != null">
+	        attribute_value1 = #{entity.attributeValue1},
+	      </if>
+	      <if test="entity.attributeValue10 != null">
+	        attribute_value10 = #{entity.attributeValue10},
+	      </if>
+	      <if test="entity.attributeValue11 != null">
+	        attribute_value11 = #{entity.attributeValue11},
+	      </if>
+	      <if test="entity.attributeValue12 != null">
+	        attribute_value12 = #{entity.attributeValue12},
+	      </if>
+	      <if test="entity.attributeValue13 != null">
+	        attribute_value13 = #{entity.attributeValue13},
+	      </if>
+	      <if test="entity.attributeValue14 != null">
+	        attribute_value14 = #{entity.attributeValue14},
+	      </if>
+	      <if test="entity.attributeValue15 != null">
+	        attribute_value15 = #{entity.attributeValue15},
+	      </if>
+	      <if test="entity.attributeValue16 != null">
+	        attribute_value16 = #{entity.attributeValue16},
+	      </if>
+	      <if test="entity.attributeValue17 != null">
+	        attribute_value17 = #{entity.attributeValue17},
+	      </if>
+	      <if test="entity.attributeValue18 != null">
+	        attribute_value18 = #{entity.attributeValue18},
+	      </if>
+	      <if test="entity.attributeValue19 != null">
+	        attribute_value19 = #{entity.attributeValue19},
+	      </if>
+	      <if test="entity.attributeValue2 != null">
+	        attribute_value2 = #{entity.attributeValue2},
+	      </if>
+	      <if test="entity.attributeValue3 != null">
+	        attribute_value3 = #{entity.attributeValue3},
+	      </if>
+	      <if test="entity.attributeValue4 != null">
+	        attribute_value4 = #{entity.attributeValue4},
+	      </if>
+	      <if test="entity.attributeValue5 != null">
+	        attribute_value5 = #{entity.attributeValue5},
+	      </if>
+	      <if test="entity.attributeValue6 != null">
+	        attribute_value6 = #{entity.attributeValue6},
+	      </if>
+	      <if test="entity.attributeValue7 != null">
+	        attribute_value7 = #{entity.attributeValue7},
+	      </if>
+	      <if test="entity.attributeValue8 != null">
+	        attribute_value8 = #{entity.attributeValue8},
+	      </if>
+	      <if test="entity.attributeValue9 != null">
+	        attribute_value9 = #{entity.attributeValue9},
+	      </if>
+	      <if test="entity.balance != null">
+	        balance = #{entity.balance,jdbcType=DECIMAL},
+	      </if>
+	      <if test="entity.bankAccount != null">
+	        bank_account = #{entity.bankAccount},
+	      </if>
+	      <if test="entity.bankName != null">
+	        bank_name = #{entity.bankName},
+	      </if>
+	      <if test="entity.email != null">
+	        email = #{entity.email},
+	      </if>
+	      <if test="entity.encodedPassword != null">
+	        encoded_password = #{entity.encodedPassword},
+	      </if>
+	      <if test="entity.frozenFund != null">
+	        frozen_fund = #{entity.frozenFund,jdbcType=DECIMAL},
+	      </if>
+	      <if test="entity.idCard != null">
+	        id_card = #{entity.idCard},
+	      </if>
+	      <if test="entity.idCardImage != null">
+	        id_card_image = #{entity.idCardImage},
+	      </if>
+	      <if test="entity.identificationNumber != null">
+	        identification_number = #{entity.identificationNumber},
+	      </if>
+	      <if test="entity.legalPerson != null">
+	        legal_person = #{entity.legalPerson},
+	      </if>
+	      <if test="entity.licenseImage != null">
+	        license_image = #{entity.licenseImage},
+	      </if>
+	      <if test="entity.licenseNumber != null">
+	        license_number = #{entity.licenseNumber},
+	      </if>
+	      <if test="entity.mobile != null">
+	        mobile = #{entity.mobile},
+	      </if>
+	      <if test="entity.name != null">
+	        name = #{entity.name},
+	      </if>
+	      <if test="entity.organizationCode != null">
+	        organization_code = #{entity.organizationCode},
+	      </if>
+	      <if test="entity.organizationImage != null">
+	        organization_image = #{entity.organizationImage},
+	      </if>
+	      <if test="entity.phone != null">
+	        phone = #{entity.phone},
+	      </if>
+	      <if test="entity.safeKey != null">
+	        safe_key_expire = #{entity.safeKey.expire},
+	      </if>
+	      <if test="entity.safeKey != null">
+	        safe_key_value = #{entity.safeKey.value},
+	      </if>
+	      <if test="entity.taxImage != null">
+	        tax_image = #{entity.taxImage},
+	      </if>
+	      <if test="entity.username != null">
+	        username = #{entity.username},
+	      </if>
+	    </set>
+     	WHERE id = #{entity.id}
+  	</update>
+  
+  	<!-- 通过名称查找商家 -->
+  	<select id="search" resultMap="BaseResultMap">
+  		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`business` business
+		LEFT JOIN `users` users ON business.`id` = users.`id`
+		<where>
+			<if test="keyword != null">
+				business.username LIKE CONCAT('%', #{keyword}, '%')
+			</if>
+			<if test="count != null">
+				LIMIT 0, ${count}
+			</if>
+		</where>
+		
+  	</select>
+  	
+	<!-- 判断是否存在 -->
+	<select id="exists" resultType="boolean">
+		SELECT
+			count(*)
+		FROM
+			`business`
+		WHERE
+			${attributeName} = #{attributeValue}
+	</select>
+	
+	<!-- 判断是否唯一 -->
+	<select id="unique" resultType="boolean">
+		SELECT
+			count(*)
+		FROM
+			`business`
+		WHERE
+			${attributeName } = #{attributeValue}
+		<if test="id != null">
+			AND id != #{id}
+		</if>
+	</select>
+	
+</mapper>

@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.shopec.dao.SnDao">
+
+    <!-- 开启二级缓存 -->
+    <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="net.shopec.entity.Sn">
+	    <result column="id" property="id" />
+	    <result column="version" property="version" />
+        <result column="created_date" property="createdDate" />
+        <result column="last_modified_date" property="lastModifiedDate" />
+        <result column="last_value" property="lastValue" />
+        <result column="type" property="type" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+    	id, version, created_date, last_modified_date, last_value, type
+    </sql>
+
+	<!-- 查找实体对象 -->
+	<select id="find" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			sn
+		WHERE
+			type = #{type.ordinal}
+	</select>
+	
+	<!-- 更新 -->
+	<update id="update" parameterType="net.shopec.entity.Sn">
+    	UPDATE sn
+		SET last_modified_date = NOW(),
+			version = #{sn.version} + 1,
+			last_value = #{sn.lastValue}
+		WHERE
+			id = #{sn.id}
+		AND version = #{sn.version}
+  	</update>
+  
+</mapper>

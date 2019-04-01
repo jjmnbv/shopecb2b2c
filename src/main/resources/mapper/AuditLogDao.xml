@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.shopec.dao.AuditLogDao">
+
+    <!-- 开启二级缓存 -->
+    <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="net.shopec.entity.AuditLog">
+    	<result column="id" property="id" />
+    	<result column="version" property="version" />
+        <result column="created_date" property="createdDate" />
+        <result column="last_modified_date" property="lastModifiedDate" />
+        <result column="action" property="action" />
+        <result column="detail" property="detail" />
+        <result column="ip" property="ip" />
+        <result column="parameters" property="parameters" jdbcType="LONGVARCHAR"
+				javaType="java.util.ArrayList" typeHandler="net.shopec.handlers.ParameterHandler"/> 
+        <result column="request_url" property="requestUrl" />
+        <association property="user" javaType="net.shopec.entity.Admin">
+        	<id column="uid" property="id" />
+        	<result column="name" property="name" />
+        </association>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+    	a.id ,
+		a.version ,
+		a.created_date ,
+		a.last_modified_date ,
+		a.action ,
+		a.detail ,
+		a.ip ,
+		a.parameters ,
+		a.request_url ,
+		u.id AS uid ,
+		u.name
+    </sql>
+
+	<select id="find" parameterType="java.lang.Long" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`audit_log` a
+		LEFT JOIN `admin` u ON a.user_id = u.id
+		WHERE
+			a.id = #{id}
+	</select>
+	
+	<!-- 查找实体对象集合 -->
+	<select id="findSet" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			audit_log
+		WHERE
+			${attributeName} = #{attributeValue}
+	</select>
+	
+	<!-- 查找实体对象分页 -->
+	<select id="selectPage" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`audit_log` a
+		LEFT JOIN `admin` u ON a.user_id = u.id
+		<where>
+		  ${ew.sqlSegment}
+		</where>
+	</select>
+	
+	<!-- 保存 -->
+	<insert id="save" parameterType="net.shopec.entity.AuditLog">
+    	INSERT INTO audit_log(
+			id ,
+			created_date ,
+			last_modified_date,
+			version ,
+			`action` ,
+			detail ,
+			ip ,
+			request_url ,
+			user_id ,
+			parameters
+		) VALUES (
+			#{entity.id}, 
+			NOW(), 
+			NOW(), 
+			0, 
+			#{entity.action}, 
+			#{entity.detail}, 
+			#{entity.ip}, 
+			#{entity.requestUrl}, 
+			#{entity.user.id}, 
+			#{entity.parameters, typeHandler=net.shopec.handlers.ParameterHandler})
+  	</insert>
+  
+  	<!-- 删除所有 -->
+  	<update id="removeAll">
+  		DELETE FROM audit_log
+  	</update>
+  	
+</mapper>

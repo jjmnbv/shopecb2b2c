@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.shopec.dao.ProductCategoryStoreDao">
+
+    <!-- 开启二级缓存 -->
+    <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="net.shopec.entity.ProductCategoryStore">
+        <id column="stores_id" property="storesId" />
+        <result column="product_categories_id" property="productCategoriesId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        stores_id, product_categories_id
+    </sql>
+	
+	<!-- 批量保存 -->
+	<insert id="batchSave" parameterType="java.util.List">
+		 INSERT INTO product_category_store (stores_id, product_categories_id) VALUES
+		<foreach collection="productCategoryStores" item="productCategoryStore" index="index" separator=",">
+			(#{productCategoryStore.storesId}, #{productCategoryStore.productCategoriesId})
+		</foreach>
+	</insert>
+	
+	<!-- 保存 -->
+	<insert id="save" parameterType="net.shopec.entity.ProductCategoryStore">
+   		INSERT INTO product_category_store (
+			stores_id ,
+			product_categories_id
+		)
+		VALUES (
+			#{entity.storesId}, 
+			#{entity.productCategoriesId}
+		)
+  	</insert>
+  
+</mapper>

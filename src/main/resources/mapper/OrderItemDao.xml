@@ -1,0 +1,124 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.shopec.dao.OrderItemDao">
+
+    <!-- 开启二级缓存 -->
+    <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="net.shopec.entity.OrderItem">
+	    <result column="id" property="id" />
+	    <result column="version" property="version" />
+        <result column="created_date" property="createdDate" />
+        <result column="last_modified_date" property="lastModifiedDate" />
+        <result column="commission_totals" property="commissionTotals" />
+        <result column="is_delivery" property="isDelivery" />
+        <result column="name" property="name" />
+        <result column="price" property="price" />
+        <result column="quantity" property="quantity" />
+        <result column="returned_quantity" property="returnedQuantity" />
+        <result column="shipped_quantity" property="shippedQuantity" />
+        <result column="sn" property="sn" />
+        <result column="specifications" property="specifications" jdbcType="LONGVARCHAR"
+				javaType="java.util.ArrayList" typeHandler="net.shopec.handlers.MyListTypeHandler" />
+        <result column="thumbnail" property="thumbnail" />
+        <result column="type" property="type" />
+        <result column="weight" property="weight" />
+        <association property="order" select="net.shopec.dao.OrderDao.find" column="orders" javaType="net.shopec.entity.Order" fetchType="lazy"/>
+        <association property="sku" select="net.shopec.dao.SkuDao.find" column="sku_id" javaType="net.shopec.entity.Sku" fetchType="lazy"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, version, created_date, last_modified_date, commission_totals, is_delivery, name, price, quantity, returned_quantity, shipped_quantity, sn, specifications, thumbnail, type, weight, orders, sku_id
+    </sql>
+	
+	<!-- 查找实体对象 -->
+	<select id="find" parameterType="java.lang.Long" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`order_item` 
+		WHERE
+			`id` = #{id}
+	</select>
+	
+	<!-- 查找实体对象集合 -->
+	<select id="findSet" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`order_item`
+		WHERE
+			${attributeName} = #{attributeValue}
+	</select>
+	
+	<!-- 批量保存 -->
+	<insert id="batchSave" parameterType="java.util.List">
+		 INSERT INTO order_item(
+			id ,
+			created_date ,
+			version ,
+			commission_totals ,
+			is_delivery ,
+			name ,
+			price ,
+			quantity ,
+			returned_quantity ,
+			shipped_quantity ,
+			sn ,
+			thumbnail ,
+			type ,
+			weight ,
+			orders ,
+			sku_id ,
+			specifications
+		)
+		VALUES
+		<foreach collection="orderItems" item="orderItem" index="index" separator=",">
+			(
+				#{orderItem.id}, 
+				NOW(), 
+				0, 
+				#{orderItem.commissionTotals}, 
+				#{orderItem.isDelivery}, 
+				#{orderItem.name}, 
+				#{orderItem.price}, 
+				#{orderItem.quantity}, 
+				#{orderItem.returnedQuantity},
+				#{orderItem.shippedQuantity}, 
+				#{orderItem.sn}, 
+				#{orderItem.thumbnail}, 
+				#{orderItem.type}, 
+				#{orderItem.weight}, 
+				#{orderItem.order.id}, 
+				#{orderItem.sku.id}, 
+				#{orderItem.specifications, typeHandler=net.shopec.handlers.MyListTypeHandler}
+			)
+		</foreach>
+	</insert>
+	
+	<!-- 更新 -->
+	<update id="update" parameterType="net.shopec.entity.OrderItem">
+   		UPDATE order_item
+		SET last_modified_date = NOW(),
+			version = #{entity.version} + 1,
+			commission_totals = #{entity.commissionTotals},
+			is_delivery = #{entity.isDelivery},
+			name = #{entity.name},
+			price = #{entity.price},
+			quantity = #{entity.quantity},
+			returned_quantity = #{entity.returnedQuantity},
+			shipped_quantity = #{entity.shippedQuantity},
+			sn = #{entity.sn},
+			thumbnail = #{entity.thumbnail},
+			type = #{entity.type},
+			weight = #{entity.weight},
+			orders = #{entity.order.id},
+			sku_id = #{entity.sku.id}
+		WHERE
+			id = #{entity.id}
+		AND version = #{entity.version}
+  	</update>
+  
+</mapper>

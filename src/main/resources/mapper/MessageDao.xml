@@ -1,0 +1,159 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.shopec.dao.MessageDao">
+
+    <!-- 开启二级缓存 -->
+    <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="net.shopec.entity.Message">
+    	<result column="id" property="id" />
+    	<result column="version" property="version" />
+        <result column="created_date" property="createdDate" />
+        <result column="last_modified_date" property="lastModifiedDate" />
+        <result column="content" property="content" />
+        <result column="ip" property="ip" />
+        <result column="is_draft" property="isDraft" />
+        <result column="receiver_delete" property="receiverDelete" />
+        <result column="receiver_read" property="receiverRead" />
+        <result column="sender_delete" property="senderDelete" />
+        <result column="sender_read" property="senderRead" />
+        <result column="title" property="title" />
+        <association property="forMessage" select="find" column="for_message_id" javaType="net.shopec.entity.Message" fetchType="lazy"/>
+        <association property="receiver" select="net.shopec.dao.MemberDao.find" column="receiver_id" javaType="net.shopec.entity.Member" fetchType="lazy"/>
+        <association property="sender" select="net.shopec.dao.MemberDao.find" column="sender_id" javaType="net.shopec.entity.Member" fetchType="lazy"/>
+        <collection property="replyMessages" select="findSet" column="{attributeName=forMessageId, attributeValue=id}" ofType="net.shopec.entity.Message" fetchType="lazy"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+    	id, version, created_date, last_modified_date, content, ip, is_draft, receiver_delete, receiver_read, sender_delete, sender_read, title, for_message_id, receiver_id, sender_id, 'forMessageId'
+    </sql>
+	
+	<!-- 查找实体对象 -->
+	<select id="find" parameterType="java.lang.Long" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`message` 
+		WHERE 
+			`id` = #{id}
+	</select>
+	
+	<!-- 查找实体对象集合 -->
+	<select id="findSet" resultType="net.shopec.entity.Message">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`message`
+		<where>
+			<if test="attributeName == 'forMessageId'">
+				AND for_message_id = #{attributeValue}
+				ORDER BY created_date ASC
+			</if>
+			<if test="attributeName != 'forMessageId'">
+				AND ${attributeName} = #{attributeValue}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 查找消息分页 -->
+	<select id="findPage" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List" />
+		FROM
+			message
+		WHERE
+			for_message_id IS NULL
+		AND is_draft = FALSE
+		
+		<if test="member != null">
+			AND (sender_id = #{member.id} AND sender_delete = FALSE) OR (receiver_id = #{member.id} AND receiver_delete = FALSE) 
+		</if>
+		<if test="member == null">
+			AND (sender_id IS NULL  AND sender_delete = FALSE) OR (receiver_id IS NULL AND receiver_delete = FALSE)
+		</if>
+		  ${ew.sqlSegment}
+	</select>
+	
+	<!-- 查找草稿分页 -->
+	<select id="findDraftPage" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List" />
+		FROM
+			message
+		WHERE
+			for_message_id IS NULL
+		AND is_draft = TRUE
+		<if test="member != null">
+			AND sender_id = #{member.id}
+		</if>
+		<if test="member == null">
+			AND sender_id IS NULL
+		</if>
+		  ${ew.sqlSegment}
+	</select>
+	
+	<!-- 查找消息数量 -->
+	<select id="count" resultType="long">
+		SELECT
+			count(*)
+		FROM 
+			`message` p
+		<where>
+			<if test="member != null">
+				<if test="read != null">
+					AND (sender_id = #{member.id} AND sender_delete = FALSE AND sender_read = #{read}) OR (receiver_id = #{member.id} AND receiver_delete = FALSE AND receiver_read = #{read})
+				</if>
+				<if test="read == null">
+					AND (sender_id = #{member.id} AND sender_delete = FALSE) OR (receiver_id = #{member.id} AND receiver_delete = FALSE)
+				</if>
+			</if>
+			<if test="member == null">
+				<if test="read != null">
+					AND (sender_id IS NULL AND sender_delete = FALSE AND sender_read = #{read}) OR (receiver_id IS NULL AND receiver_delete = FALSE AND receiver_read = #{read})
+				</if>
+				<if test="read == null">
+					AND (sender_id IS NULL AND sender_delete = FALSE) OR (receiver_id IS NULL AND receiver_delete = FALSE)
+				</if>
+			</if>
+		</where>
+	</select>
+	
+	<!-- 保存 -->
+	<insert id="save" parameterType="net.shopec.entity.Message">
+    	INSERT INTO message (
+			id ,
+			created_date ,
+			version ,
+			ip ,
+			is_draft ,
+			receiver_delete ,
+			receiver_read ,
+			sender_delete ,
+			sender_read ,
+			title ,
+			for_message_id ,
+			receiver_id ,
+			sender_id ,
+			content
+		)
+		VALUES (
+			#{entity.id}, 
+			#{entity.createdDate},
+			#{entity.version}, 
+			#{entity.ip}, 
+			#{entity.isDraft}, 
+			#{entity.receiverDelete}, 
+			#{entity.receiverRead}, 
+			#{entity.senderDelete}, 
+			#{entity.senderRead}, 
+			#{entity.title}, 
+			#{entity.forMessage.id}, 
+			#{entity.receiver.id}, 
+			#{entity.sender.id}, 
+			#{entity.content}
+		)
+  	</insert>
+	
+</mapper>

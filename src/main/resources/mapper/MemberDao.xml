@@ -1,0 +1,371 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.shopec.dao.MemberDao">
+
+    <!-- 开启二级缓存 -->
+    <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>
+	
+	<!-- User查询映射结果 -->
+    <resultMap id="UserResultMap" type="net.shopec.entity.User">
+	    <result column="id" property="id" />
+	    <result column="version" property="version" />
+        <result column="created_date" property="createdDate" />
+        <result column="last_modified_date" property="lastModifiedDate" />
+        <result column="is_enabled" property="isEnabled" />
+        <result column="is_locked" property="isLocked" />
+        <result column="last_login_date" property="lastLoginDate" />
+        <result column="last_login_ip" property="lastLoginIp" />
+        <result column="lock_date" property="lockDate" />
+    </resultMap>
+    
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="net.shopec.entity.Member" extends="UserResultMap">
+    	<result column="id" property="id" />
+        <result column="address" property="address" />
+        <result column="amount" property="amount" />
+        <result column="attribute_value0" property="attributeValue0" />
+        <result column="attribute_value1" property="attributeValue1" />
+        <result column="attribute_value2" property="attributeValue2" />
+        <result column="attribute_value3" property="attributeValue3" />
+        <result column="attribute_value4" property="attributeValue4" />
+        <result column="attribute_value5" property="attributeValue5" />
+        <result column="attribute_value6" property="attributeValue6" />
+        <result column="attribute_value7" property="attributeValue7" />
+        <result column="attribute_value8" property="attributeValue8" />
+        <result column="attribute_value9" property="attributeValue9" />
+        <result column="balance" property="balance" />
+        <result column="birth" property="birth" />
+        <result column="email" property="email" />
+        <result column="encoded_password" property="encodedPassword" />
+        <result column="gender" property="gender" />
+        <result column="mobile" property="mobile" />
+        <result column="name" property="name" />
+        <result column="phone" property="phone" />
+        <result column="point" property="point" />
+        <result column="safe_key_expire" property="safeKey.expire" />
+        <result column="safe_key_value" property="safeKey.value" />
+        <result column="username" property="username" />
+        <result column="zip_code" property="zipCode" />
+        <association property="area" select="net.shopec.dao.AreaDao.find" column="area_id" javaType="net.shopec.entity.Area" fetchType="lazy"/>
+        <association property="memberRank" select="net.shopec.dao.MemberRankDao.find" column="member_rank_id" javaType="net.shopec.entity.MemberRank" fetchType="lazy"/>
+        <association property="cart" select="net.shopec.dao.CartDao.findByAttribute" column="{attributeName=member_id, attributeValue=id}" javaType="net.shopec.entity.Cart" fetchType="lazy"/>
+        <collection property="orders" select="net.shopec.dao.OrderDao.findSet" column="{attributeName=member_id, attributeValue=id}" ofType="net.shopec.entity.Order" fetchType="lazy"/>
+        <collection property="memberDepositLogs" select="net.shopec.dao.MemberDepositLogDao.findSet" column="{attributeName=member_id, attributeValue=id}" ofType="net.shopec.entity.MemberDepositLog" fetchType="lazy"/>
+        <collection property="couponCodes" select="net.shopec.dao.CouponCodeDao.findSet" column="{attributeName=member_id, attributeValue=id}" ofType="net.shopec.entity.CouponCode" fetchType="lazy"/>
+        <collection property="receivers" select="net.shopec.dao.ReceiverDao.findSet" column="{attributeName=member_id, attributeValue=id}" ofType="net.shopec.entity.Receiver" fetchType="lazy"/>
+        <collection property="reviews" select="net.shopec.dao.ReviewDao.findSet" column="{attributeName=member_id, attributeValue=id}" ofType="net.shopec.entity.Review" fetchType="lazy"/>
+        <collection property="consultations" select="net.shopec.dao.ConsultationDao.findSet" column="{attributeName=member_id, attributeValue=id}" ofType="net.shopec.entity.Consultation" fetchType="lazy"/>
+        <collection property="productFavorites" select="net.shopec.dao.ProductFavoriteDao.findSet" column="{attributeName=member_id, attributeValue=id}" ofType="net.shopec.entity.ProductFavorite" fetchType="lazy"/>
+        <collection property="storeFavorites" select="net.shopec.dao.StoreFavoriteDao.findSet" column="{attributeName=member_id, attributeValue=id}" ofType="net.shopec.entity.StoreFavorite" fetchType="lazy"/>
+        <collection property="productNotifies" select="net.shopec.dao.ProductNotifyDao.findSet" column="{attributeName=member_id, attributeValue=id}" ofType="net.shopec.entity.ProductNotify" fetchType="lazy"/>
+        <collection property="inMessages" select="net.shopec.dao.MessageDao.findSet" column="{attributeName=receiver_id, attributeValue=id}" ofType="net.shopec.entity.Message" fetchType="lazy"/>
+        <collection property="outMessages" select="net.shopec.dao.MessageDao.findSet" column="{attributeName=sender_id, attributeValue=id}" ofType="net.shopec.entity.Message" fetchType="lazy"/>
+        <collection property="pointLogs" select="net.shopec.dao.PointLogDao.findSet" column="{attributeName=member_id, attributeValue=id}" ofType="net.shopec.entity.PointLog" fetchType="lazy"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+    	member.id ,
+		address ,
+		amount ,
+		attribute_value0 ,
+		attribute_value1 ,
+		attribute_value2 ,
+		attribute_value3 ,
+		attribute_value4 ,
+		attribute_value5 ,
+		attribute_value6 ,
+		attribute_value7 ,
+		attribute_value8 ,
+		attribute_value9 ,
+		balance ,
+		birth ,
+		email ,
+		encoded_password ,
+		gender ,
+		mobile ,
+		name ,
+		phone ,
+		point ,
+		safe_key_expire ,
+		safe_key_value ,
+		username ,
+		zip_code ,
+		area_id ,
+		member_rank_id ,
+		users.version ,
+		users.created_date ,
+		users.last_modified_date ,
+		users.is_enabled ,
+		users.is_locked ,
+		users.last_login_date ,
+		users.last_login_ip ,
+		users.lock_date,
+		'member_id',
+		'receiver_id',
+		'sender_id'
+    </sql>
+	
+	<!-- 查找实体对象 -->
+	<select id="find" parameterType="java.lang.Long" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`member` member
+		LEFT JOIN `users` users ON member.`id` = users.`id`
+		WHERE
+			member.`id` = #{id}
+	</select>
+	
+	<!-- 查找实体对象集合 -->
+	<select id="findSet" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`member`
+		WHERE
+			${attributeName} = #{attributeValue}
+	</select>
+	
+	<!-- 根据属性查找实体对象 -->
+	<select id="findByAttribute" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`member` member
+		LEFT JOIN `users` users ON member.`id` = users.`id`
+		WHERE
+			${attributeName } = #{attributeValue}
+	</select>
+	
+	<!-- 查找会员分页 -->
+	<select id="findPage" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`member` member
+		LEFT JOIN `users` users ON member.`id` = users.`id`
+		<if test="rankingType != null">
+			<choose>
+				<when test="rankingType.name == 'point'">
+					ORDER BY point DESC
+				</when>
+				<when test="rankingType.name == 'balance'">
+					ORDER BY balance DESC
+				</when>
+				<when test="rankingType.name == 'amount'">
+					ORDER BY amount DESC
+				</when>
+			</choose>
+		</if>
+		${ew.sqlSegment}
+	</select>
+	
+	<!-- 查询会员注册数 -->
+	<select id="registerMemberCount" resultType="long">
+		SELECT
+			count(*)
+		FROM
+			`member`
+		<where>
+			<if test="beginDate != null">
+				AND created_date <![CDATA[ >= ]]> #{beginDate}
+			</if>
+			<if test="endDate != null">
+				AND created_date <![CDATA[ <= ]]> #{endDate}
+			</if>
+		</where>
+	</select>
+	
+	<!-- 查找实体对象分页 -->
+	<select id="selectPage" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`member` member
+		LEFT JOIN `users` users ON member.`id` = users.`id`
+		<where>
+		  ${ew.sqlSegment}
+		</where>
+	</select>
+	
+	<!-- 保存 -->
+	<insert id="save" parameterType="net.shopec.entity.Member">
+    	INSERT INTO member(
+			id ,
+			address ,
+			amount ,
+			attribute_value0 ,
+			attribute_value1 ,
+			attribute_value2 ,
+			attribute_value3 ,
+			attribute_value4 ,
+			attribute_value5 ,
+			attribute_value6 ,
+			attribute_value7 ,
+			attribute_value8 ,
+			attribute_value9 ,
+			balance ,
+			birth ,
+			email ,
+			encoded_password ,
+			gender ,
+			mobile ,
+			NAME ,
+			phone ,
+			point ,
+			safe_key_expire ,
+			safe_key_value ,
+			username ,
+			zip_code ,
+			area_id ,
+			member_rank_id
+		) VALUES (
+			#{entity.id}, 
+			#{entity.address}, 
+			#{entity.amount}, 
+			#{entity.attributeValue0}, 
+			#{entity.attributeValue1}, 
+			#{entity.attributeValue2}, 
+			#{entity.attributeValue3}, 
+			#{entity.attributeValue4}, 
+			#{entity.attributeValue5}, 
+			#{entity.attributeValue6}, 
+			#{entity.attributeValue7}, 
+			#{entity.attributeValue8}, 
+			#{entity.attributeValue9}, 
+			#{entity.balance}, 
+			#{entity.birth}, 
+			#{entity.email}, 
+			#{entity.encodedPassword}, 
+			#{entity.gender}, 
+			#{entity.mobile}, 
+			#{entity.name}, 
+			#{entity.phone}, 
+			#{entity.point}, 
+			#{entity.safeKey.expire}, 
+			#{entity.safeKey.value},
+			#{entity.username}, 
+			#{entity.zipCode}, 
+			#{entity.area.id}, 
+			#{entity.memberRank.id})
+  	</insert>
+	
+	<!-- 更新 -->
+	<update id="update" parameterType="net.shopec.entity.Member">
+	    UPDATE member
+	    <set>
+	      <if test="entity.address != null">
+	        address = #{entity.address},
+	      </if>
+	      <if test="entity.amount != null">
+	        amount = #{entity.amount},
+	      </if>
+	      <if test="entity.attributeValue0 != null">
+	        attribute_value0 = #{entity.attributeValue0},
+	      </if>
+	      <if test="entity.attributeValue1 != null">
+	        attribute_value1 = #{entity.attributeValue1},
+	      </if>
+	      <if test="entity.attributeValue2 != null">
+	        attribute_value2 = #{entity.attributeValue2},
+	      </if>
+	      <if test="entity.attributeValue3 != null">
+	        attribute_value3 = #{entity.attributeValue3},
+	      </if>
+	      <if test="entity.attributeValue4 != null">
+	        attribute_value4 = #{entity.attributeValue4},
+	      </if>
+	      <if test="entity.attributeValue5 != null">
+	        attribute_value5 = #{entity.attributeValue5},
+	      </if>
+	      <if test="entity.attributeValue6 != null">
+	        attribute_value6 = #{entity.attributeValue6},
+	      </if>
+	      <if test="entity.attributeValue7 != null">
+	        attribute_value7 = #{entity.attributeValue7},
+	      </if>
+	      <if test="entity.attributeValue8 != null">
+	        attribute_value8 = #{entity.attributeValue8},
+	      </if>
+	      <if test="entity.attributeValue9 != null">
+	        attribute_value9 = #{entity.attributeValue9},
+	      </if>
+	      <if test="entity.balance != null">
+	        balance = #{entity.balance},
+	      </if>
+	      <if test="entity.birth != null">
+	        birth = #{entity.birth},
+	      </if>
+	      <if test="entity.email != null">
+	        email = #{entity.email},
+	      </if>
+	      <if test="entity.encodedPassword != null">
+	        encoded_password = #{entity.encodedPassword},
+	      </if>
+	      <if test="entity.gender != null">
+	        gender = #{entity.gender},
+	      </if>
+	      <if test="entity.mobile != null">
+	        mobile = #{entity.mobile},
+	      </if>
+	      <if test="entity.name != null">
+	        name = #{entity.name},
+	      </if>
+	      <if test="entity.phone != null">
+	        phone = #{entity.phone},
+	      </if>
+	      <if test="entity.point != null">
+	        point = #{entity.point},
+	      </if>
+	      <if test="entity.safeKey != null">
+	        safe_key_expire = #{entity.safeKey.expire},
+	      </if>
+	      <if test="entity.safeKey != null">
+	        safe_key_value = #{entity.safeKey.value},
+	      </if>
+	      <if test="entity.username != null">
+	        username = #{entity.username},
+	      </if>
+	      <if test="entity.zipCode != null">
+	        zip_code = #{entity.zipCode},
+	      </if>
+	      <if test="entity.area != null">
+	        area_id = #{entity.area.id},
+	      </if>
+	      <if test="entity.memberRank != null">
+	        member_rank_id = #{entity.memberRank.id},
+	      </if>
+	    </set>
+	    WHERE id = #{entity.id}
+	  </update>
+  
+	<!-- 清除会员注册项值 -->
+	<update id="clearAttributeValue">
+		UPDATE member SET ${propertyName} = null
+	</update>
+	
+	<!-- 判断是否存在 -->
+	<select id="exists" resultType="boolean">
+		SELECT
+			COUNT(1)
+		FROM
+			`member`
+		WHERE
+			${attributeName} = #{attributeValue}
+	</select>
+	
+	<!-- 判断是否唯一 -->
+	<select id="unique" resultType="boolean">
+		SELECT
+			COUNT(1)
+		FROM
+			`member`
+		WHERE
+			${attributeName } = #{attributeValue}
+		<if test="id != null">
+			AND id != #{id}
+		</if>
+	</select>
+	
+</mapper>

@@ -1,0 +1,16 @@
+.btn {
+    width: 60px;
+    height: 20px;
+    margin: 0px;
+    top: 0px;
+    left: 0px;
+    color: #ffffff;
+    cursor: pointer;
+    outline: none;
+    blr: expression(this.hideFocus = true);
+    -webkit-transition: opacity ease-in-out 0.2s;
+    -moz-transition: opacity ease-in-out 0.2s;
+    transition: opacity ease-in-out 0.2s;
+    border: 0px;
+    background: #f71752;
+}

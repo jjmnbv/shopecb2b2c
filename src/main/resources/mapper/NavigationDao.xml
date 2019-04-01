@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.shopec.dao.NavigationDao">
+
+    <!-- 开启二级缓存 -->
+    <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="net.shopec.entity.Navigation">
+    	<result column="id" property="id" />
+    	<result column="version" property="version" />
+        <result column="created_date" property="createdDate" />
+        <result column="last_modified_date" property="lastModifiedDate" />
+        <result column="orders" property="order" />
+        <result column="is_blank_target" property="isBlankTarget" />
+        <result column="name" property="name" />
+        <result column="position" property="position" />
+        <result column="url" property="url" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+    	id, version, created_date, last_modified_date, orders, is_blank_target, name, position, url
+    </sql>
+
+	<!-- 查找实体对象 -->
+	<select id="find" parameterType="java.lang.Long" resultMap="BaseResultMap">
+		SELECT
+		<include refid="Base_Column_List"></include>
+		FROM
+		`navigation`
+		WHERE
+		`id` = #{id}
+	</select>
+
+	<!-- 查找导航 -->
+	<select id="findList" resultMap="BaseResultMap">
+		SELECT 
+			<include refid="Base_Column_List"></include>
+		FROM
+			navigation
+		<if test="position != null">
+			WHERE position = #{position.ordinal}
+		</if>
+		ORDER BY
+			orders ASC
+	</select>
+	
+	<!-- 保存 -->
+	<insert id="save" parameterType="net.shopec.entity.Navigation">
+   		INSERT INTO navigation(
+			id ,
+			created_date ,
+			version ,
+			orders ,
+			is_blank_target ,
+			name ,
+			position ,
+			url
+		)
+		VALUES (
+			#{entity.id}, 
+			#{entity.createdDate}, 
+			#{entity.version}, 
+			#{entity.order}, 
+			#{entity.isBlankTarget}, 
+			#{entity.name}, 
+			#{entity.position}, 
+			#{entity.url}
+		)
+  	</insert>
+  	
+  	<!-- 更新 -->
+  	<update id="update" parameterType="net.shopec.entity.Navigation">
+    	UPDATE navigation
+		SET last_modified_date = #{entity.lastModifiedDate},
+			version = #{entity.version} + 1,
+			orders = #{entity.order},
+			is_blank_target = #{entity.isBlankTarget},
+			name = #{entity.name},
+			position = #{entity.position},
+			url = #{entity.url}
+		WHERE
+			id = #{entity.id}
+		AND version = #{entity.version}
+  	</update>
+  	
+</mapper>

@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.shopec.dao.ProductProductTagDao">
+
+    <!-- 开启二级缓存 -->
+    <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="net.shopec.entity.ProductProductTag">
+        <id column="products_id" property="productsId" />
+        <result column="product_tags_id" property="productTagsId" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        products_id, product_tags_id
+    </sql>
+
+	<!-- 批量保存 -->
+	<insert id="batchSave" parameterType="java.util.List">
+		 INSERT INTO product_product_tag (products_id, product_tags_id) VALUES
+		<foreach collection="productProductTags" item="productProductTag" index="index" separator=",">
+			(#{productProductTag.productsId}, #{productProductTag.productTagsId})
+		</foreach>
+	</insert>
+	
+</mapper>

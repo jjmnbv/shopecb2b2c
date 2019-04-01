@@ -1,0 +1,336 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.shopec.dao.StoreDao">
+
+    <!-- 开启二级缓存 -->
+    <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="net.shopec.entity.Store">
+	    <result column="id" property="id" />
+	    <result column="version" property="version" />
+        <result column="created_date" property="createdDate" />
+        <result column="last_modified_date" property="lastModifiedDate" />
+        <result column="address" property="address" />
+        <result column="bail_paid" property="bailPaid" />
+        <result column="discount_promotion_end_date" property="discountPromotionEndDate" />
+        <result column="email" property="email" />
+        <result column="end_date" property="endDate" />
+        <result column="full_reduction_promotion_end_date" property="fullReductionPromotionEndDate" />
+        <result column="introduction" property="introduction" />
+        <result column="is_enabled" property="isEnabled" />
+        <result column="keyword" property="keyword" />
+        <result column="logo" property="logo" />
+        <result column="mobile" property="mobile" />
+        <result column="name" property="name" />
+        <result column="phone" property="phone" />
+        <result column="status" property="status" />
+        <result column="type" property="type" />
+        <result column="zip_code" property="zipCode" />
+        <association property="business" select="net.shopec.dao.BusinessDao.find" column="business_id" javaType="net.shopec.entity.Business" fetchType="lazy"/>
+        <association property="storeRank" select="net.shopec.dao.StoreRankDao.find" column="store_rank_id" javaType="net.shopec.entity.StoreRank" fetchType="lazy"/>
+        <association property="storeCategory" select="net.shopec.dao.StoreCategoryDao.find" column="store_category_id" javaType="net.shopec.entity.StoreCategory"  fetchType="lazy"/>
+       	<collection property="storeAdImages" select="net.shopec.dao.StoreAdImageDao.findSet" column="{attributeName=store_id, attributeValue=id}" ofType="net.shopec.entity.StoreAdImage" fetchType="lazy"/>
+        <collection property="instantMessages" select="net.shopec.dao.InstantMessageDao.findSet" column="{attributeName=store_id, attributeValue=id}" ofType="net.shopec.entity.InstantMessage" fetchType="lazy"/>
+        <collection property="storeProductCategories" select="net.shopec.dao.StoreProductCategoryDao.findSet" column="{attributeName=store_id, attributeValue=id}" ofType="net.shopec.entity.StoreProductCategory" fetchType="lazy"/>
+        <collection property="productCategories" select="net.shopec.dao.ProductCategoryDao.findSet" column="{attributeName=store_id, attributeValue=id}" ofType="net.shopec.entity.ProductCategory" fetchType="lazy"/>
+        <collection property="categoryApplications" select="net.shopec.dao.CategoryApplicationDao.findSet" column="{attributeName=store_id, attributeValue=id}" ofType="net.shopec.entity.CategoryApplication" fetchType="lazy"/>
+        <collection property="storeProductTags" select="net.shopec.dao.StoreProductTagDao.findSet" column="{attributeName=store_id, attributeValue=id}" ofType="net.shopec.entity.StoreProductTag" fetchType="lazy"/>
+        <collection property="products" select="net.shopec.dao.ProductDao.findSet" column="{attributeName=store_id, attributeValue=id}" ofType="net.shopec.entity.Product" fetchType="lazy"/>
+        <collection property="promotions" select="net.shopec.dao.PromotionDao.findSet" column="{attributeName=store_id, attributeValue=id}" ofType="net.shopec.entity.Promotion" fetchType="lazy"/>
+        <collection property="coupons" select="net.shopec.dao.CouponDao.findSet" column="{attributeName=store_id, attributeValue=id}" ofType="net.shopec.entity.Coupon" fetchType="lazy"/>
+        <collection property="orders" select="net.shopec.dao.OrderDao.findSet" column="{attributeName=store_id, attributeValue=id}" ofType="net.shopec.entity.Order" fetchType="lazy"/>
+        <collection property="storeFavorites" select="net.shopec.dao.StoreFavoriteDao.findSet" column="{attributeName=store_id, attributeValue=id}" ofType="net.shopec.entity.StoreFavorite" fetchType="lazy"/>
+        <collection property="deliveryTemplates" select="net.shopec.dao.DeliveryTemplateDao.findSet" column="{attributeName=store_id, attributeValue=id}" ofType="net.shopec.entity.DeliveryTemplate" fetchType="lazy"/>
+        <collection property="deliveryCenters" select="net.shopec.dao.DeliveryCenterDao.findSet" column="{attributeName=store_id, attributeValue=id}" ofType="net.shopec.entity.DeliveryCenter" fetchType="lazy"/>
+        <collection property="defaultFreightConfigs" select="net.shopec.dao.DefaultFreightConfigDao.findSet" column="{attributeName=store_id, attributeValue=id}" ofType="net.shopec.entity.DefaultFreightConfig" fetchType="lazy"/>
+        <collection property="areaFreightConfigs" select="net.shopec.dao.AreaFreightConfigDao.findSet" column="{attributeName=store_id, attributeValue=id}" ofType="net.shopec.entity.AreaFreightConfig" fetchType="lazy"/>
+        <!-- <collection property="svcs" select="net.shopec.dao.SvcDao.findSet" column="{attributeName=store_id, attributeValue=id}" ofType="net.shopec.entity.Svc" fetchType="lazy"/> -->
+        <collection property="paymentTransactions" select="net.shopec.dao.PaymentTransactionDao.findSet" column="{attributeName=store_id, attributeValue=id}" ofType="net.shopec.entity.PaymentTransaction" fetchType="lazy"/>
+        <collection property="consultations" select="net.shopec.dao.ConsultationDao.findSet" column="{attributeName=store_id, attributeValue=id}" ofType="net.shopec.entity.Consultation" fetchType="lazy"/>
+        <collection property="reviews" select="net.shopec.dao.ReviewDao.findSet" column="{attributeName=store_id, attributeValue=id}" ofType="net.shopec.entity.Review" fetchType="lazy"/>
+        <collection property="statistics" select="net.shopec.dao.StatisticDao.findSet" column="{attributeName=store_id, attributeValue=id}" ofType="net.shopec.entity.Statistic" fetchType="lazy"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, version, created_date, last_modified_date, address, bail_paid, discount_promotion_end_date, email, end_date, full_reduction_promotion_end_date, introduction, is_enabled, keyword, logo, mobile, name, phone, status, type, zip_code, business_id, store_category_id, store_rank_id, 'store_id'
+    </sql>
+	
+	<!-- 查找实体对象 -->
+	<select id="find" parameterType="java.lang.Long" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`store`
+		WHERE
+			`id` = #{id}
+	</select>
+	
+	<!-- 查找实体对象集合 -->
+	<select id="findSet" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`store`
+		<if test="attributeName == 'product_category_id'">
+			LEFT JOIN `product_category_store` ON id = stores_id
+			WHERE
+				product_categories_id = #{attributeValue}
+		</if>
+		<if test="attributeName != 'product_category_id'">
+			WHERE
+				${attributeName} = #{attributeValue}
+		</if>
+	</select>
+	
+	<!-- 查找所有实体对象集合 -->
+	<select id="findAll" resultType="net.shopec.entity.Store">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`store`
+	</select>
+	
+	<!-- 根据属性查找实体对象 -->
+	<select id="findByAttribute" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`store`
+		WHERE
+			${attributeName } = #{attributeValue}
+	</select>
+	
+	<!-- 查找店铺 -->
+	<select id="findList" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`store`
+		<where>
+			<if test="type != null">
+				AND type = #{type.ordinal}
+			</if>
+			<if test="status != null">
+				AND status = #{status.ordindal}
+			</if>
+			<if test="isEnabled != null">
+				AND is_enabled = #{isEnabled}
+			</if>
+			<if test="hasExpired != null">
+				<if test="hasExpired == true">
+					AND (end_date IS NOT NULL) AND end_date <![CDATA[ <= ]]> NOW()
+				</if>
+				<if test="hasExpired == false">
+					 AND (end_date IS NULL OR end_date <![CDATA[ > ]]> NOW())
+				</if>
+			</if>
+		</where>
+	</select>
+	
+	<!-- 查找店铺分页 -->
+	<select id="findPage" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`store`
+		<where>
+			<if test="type != null">
+			  	AND type = #{type.ordinal}
+		  	</if>
+		  	<if test="status != null">
+		  		AND `status` = #{status.ordinal}
+		  	</if>
+		  	<if test="isEnabled != null">
+		  		AND is_enabled = #{isEnabled}
+		  	</if>
+		  	<if test="hasExpired != null">
+		  		<if test="hasExpired == true">
+		  			AND (end_date IS NOT NULL AND end_date <![CDATA[ <= ]]> NOW())
+		  		</if>
+		  		<if test="hasExpired == false">
+		  			AND (end_date IS NULL OR end_date <![CDATA[ > ]]> NOW())
+		  		</if>
+		  	</if>
+		  	${ew.sqlSegment}
+		</where>
+	</select>
+	
+	<!-- 查找经营分类 -->
+	<select id="findProductCategoryList" resultType="net.shopec.entity.ProductCategory">
+		SELECT
+			productCategory.id ,
+			productCategory.version ,
+			productCategory.created_date ,
+			productCategory.last_modified_date ,
+			productCategory.orders ,
+			productCategory.general_rate ,
+			productCategory.grade ,
+			productCategory.name ,
+			productCategory.self_rate ,
+			productCategory.seo_description ,
+			productCategory.seo_keywords ,
+			productCategory.seo_title ,
+			productCategory.tree_path ,
+			productCategory.parent_id
+		FROM
+			`product_category` productCategory
+		LEFT JOIN `category_application` categoryApplication ON productCategory.`id` = categoryApplication.`product_category_id`
+		<where>
+			<if test="store != null">
+				AND categoryApplication.`store_id` = #{store.id} 
+			</if>
+			<if test="status != null">
+				AND categoryApplication.`status` = #{status.ordinal} 
+			</if>
+		</where>
+	</select>
+	
+	<!-- 判断是否存在 -->
+	<select id="exists" resultType="boolean">
+		SELECT
+			COUNT(1)
+		FROM
+			`store`
+		WHERE
+			${attributeName} = #{attributeValue}
+	</select>
+	
+	<!-- 判断是否唯一 -->
+	<select id="unique" resultType="boolean">
+		SELECT
+			count(1)
+		FROM
+			`store`
+		WHERE
+			${attributeName } = #{attributeValue}
+		<if test="id != null">
+			AND id != #{id}
+		</if>
+	</select>
+	
+	<!-- 保存 -->
+	<insert id="save" parameterType="net.shopec.entity.Store">
+		INSERT INTO store(
+			id ,
+			created_date ,
+			version ,
+			address ,
+			bail_paid ,
+			discount_promotion_end_date ,
+			email ,
+			end_date ,
+			full_reduction_promotion_end_date ,
+			is_enabled ,
+			keyword ,
+			logo ,
+			mobile ,
+			name ,
+			phone ,
+			STATUS ,
+			type ,
+			zip_code ,
+			business_id ,
+			store_category_id ,
+			store_rank_id ,
+			introduction
+		) 
+		VALUES (
+			#{entity.id}, 
+			#{entity.createdDate},
+			#{entity.version}, 
+			#{entity.address}, 
+			#{entity.bailPaid}, 
+			#{entity.discountPromotionEndDate}, 
+			#{entity.email}, 
+			#{entity.endDate}, 
+			#{entity.fullReductionPromotionEndDate}, 
+			#{entity.isEnabled}, 
+			#{entity.keyword}, 
+			#{entity.logo}, 
+			#{entity.mobile}, 
+			#{entity.name}, 
+			#{entity.phone}, 
+			#{entity.status}, 
+			#{entity.type}, 
+			#{entity.zipCode}, 
+			#{entity.business.id}, 
+			#{entity.storeCategory.id}, 
+			#{entity.storeRank.id}, 
+			#{entity.introduction}
+		)
+	</insert>
+  
+    <!-- 更新 -->
+  	<update id="update" parameterType="map">
+	    UPDATE store
+	    <set>
+	      <if test="entity.lastModifiedDate != null">
+	        last_modified_date = NOW(),
+	      </if>
+	      <if test="entity.version != null">
+	        version = #{entity.version} + 1,
+	      </if>
+	      <if test="entity.address != null">
+	        address = #{entity.address},
+	      </if>
+	      <if test="entity.bailPaid != null">
+	        bail_paid = #{entity.bailPaid},
+	      </if>
+	      <if test="entity.discountPromotionEndDate != null">
+	        discount_promotion_end_date = #{entity.discountPromotionEndDate},
+	      </if>
+	      <if test="entity.email != null">
+	        email = #{entity.email},
+	      </if>
+	      <if test="entity.endDate != null">
+	        end_date = #{entity.endDate},
+	      </if>
+	      <if test="entity.fullReductionPromotionEndDate != null">
+	        full_reduction_promotion_end_date = #{entity.fullReductionPromotionEndDate},
+	      </if>
+	      <if test="entity.isEnabled != null">
+	        is_enabled = #{entity.isEnabled},
+	      </if>
+	      <if test="entity.keyword != null">
+	        keyword = #{entity.keyword},
+	      </if>
+	      <if test="entity.logo != null">
+	        logo = #{entity.logo},
+	      </if>
+	      <if test="entity.mobile != null">
+	        mobile = #{entity.mobile},
+	      </if>
+	      <if test="entity.name != null">
+	        name = #{entity.name},
+	      </if>
+	      <if test="entity.phone != null">
+	        phone = #{entity.phone},
+	      </if>
+	      <if test="entity.status != null">
+	        status = #{entity.status},
+	      </if>
+	      <if test="entity.type != null">
+	        type = #{entity.type},
+	      </if>
+	      <if test="entity.zipCode != null">
+	        zip_code = #{entity.zipCode},
+	      </if>
+	      <if test="entity.business != null">
+	        business_id = #{entity.business.id},
+	      </if>
+	      <if test="entity.storeCategory != null">
+	        store_category_id = #{entity.storeCategory.id},
+	      </if>
+	      <if test="entity.storeRank != null">
+	        store_rank_id = #{entity.storeRank.id},
+	      </if>
+	      <if test="entity.introduction != null">
+	        introduction = #{entity.introduction},
+	      </if>
+	    </set>
+	    WHERE id = #{entity.id}
+	  </update>
+	  
+</mapper>

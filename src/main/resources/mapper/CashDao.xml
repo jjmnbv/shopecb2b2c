@@ -1,0 +1,110 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.shopec.dao.CashDao">
+
+    <!-- 开启二级缓存 -->
+    <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="net.shopec.entity.Cash">
+	  	<result column="id" property="id" />
+    	<result column="version" property="version" />
+        <result column="created_date" property="createdDate" />
+        <result column="last_modified_date" property="lastModifiedDate" />
+        <result column="account" property="account" />
+        <result column="amount" property="amount" />
+        <result column="bank" property="bank" />
+        <result column="status" property="status" />
+        <association property="business" select="net.shopec.dao.BusinessDao.find" column="business_id" fetchType="lazy" javaType="net.shopec.entity.Business"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+    	id, version, created_date, last_modified_date, account, amount, bank, status, business_id
+    </sql>
+	
+	<!-- 查找实体对象 -->
+	<select id="find" parameterType="java.lang.Long" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`cash` 
+		WHERE
+			`id` = #{id}
+	</select>
+	
+	<!-- 查找实体对象集合 -->
+	<select id="findSet" resultType="net.shopec.entity.Cash">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`cash`
+		WHERE
+			${attributeName } = #{attributeValue}
+	</select>
+	
+	<!-- 查找实体对象分页 -->
+	<select id="selectPage" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`cash`
+		<where>
+		  ${ew.sqlSegment}
+		</where>
+	</select>
+	
+	<!-- 查找提现记录分页 -->
+	<select id="findPage" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`cash`
+		<where>
+			<if test="business != null">
+				AND business_id = #{business.id}
+			</if>
+		  ${ew.sqlSegment}
+		</where>
+	</select>
+	
+	<!-- 保存 -->
+	<insert id="save" parameterType="net.shopec.entity.Cash">
+    	INSERT INTO cash (
+			id ,
+			created_date ,
+			version ,
+			account ,
+			amount ,
+			bank ,
+			status ,
+			business_id
+		)
+		VALUES (
+			#{entity.id}, 
+			#{entity.createdDate},
+			#{entity.version}, 
+			#{entity.account}, 
+			#{entity.amount}, 
+			#{entity.bank}, 
+			#{entity.status}, 
+			#{entity.business.id}
+		)
+  	</insert>
+  	
+  	<!-- 更新 -->
+  	<update id="update" parameterType="net.shopec.entity.Cash">
+   		UPDATE cash
+		SET last_modified_date = #{entity.lastModifiedDate},
+			version = #{entity.version} + 1,
+			account = #{entity.account},
+			amount = #{entity.amount},
+			bank = #{entity.bank},
+			status = #{entity.status},
+			business_id = #{entity.business.id}
+		WHERE
+			id = #{entity.id}
+		AND version = #{entity.version}
+  	</update>
+  	
+</mapper>

@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.shopec.dao.MemberDepositLogDao">
+
+    <!-- 开启二级缓存 -->
+    <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="net.shopec.entity.MemberDepositLog">
+	    <result column="id" property="id" />
+	    <result column="version" property="version" />
+        <result column="created_date" property="createdDate" />
+        <result column="last_modified_date" property="lastModifiedDate" />
+        <result column="balance" property="balance" />
+        <result column="credit" property="credit" />
+        <result column="debit" property="debit" />
+        <result column="memo" property="memo" />
+        <result column="type" property="type" />
+        <association property="member" select="net.shopec.dao.MemberDao.find" column="member_id" javaType="net.shopec.entity.Member" fetchType="lazy"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+   		memberDepositLog.id, memberDepositLog.version, memberDepositLog.created_date, memberDepositLog.last_modified_date, memberDepositLog.balance, memberDepositLog.credit, memberDepositLog.debit, memberDepositLog.memo, memberDepositLog.type, memberDepositLog.member_id
+    </sql>
+	
+	<!-- 查找实体对象集合 -->
+	<select id="findSet" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`member_deposit_log` memberDepositLog
+		WHERE
+			member_id = #{attributeValue}
+	</select>
+	
+	<!-- 查找会员预存款记录分页 -->
+	<select id="findPage" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`member_deposit_log` memberDepositLog
+		<where>
+			<if test="member != null">
+				AND member_id = #{member.id}
+			</if>
+			${ew.sqlSegment}
+		</where>
+	</select>
+	
+	<!-- 查找实体对象分页 -->
+	<select id="selectPage" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			member_deposit_log memberDepositLog
+		LEFT JOIN member member ON memberDepositLog.`member_id` = member.`id`
+		<where>
+		  ${ew.sqlSegment}
+		</where>
+	</select>
+	
+	<!-- 保存 -->
+	<insert id="save" parameterType="net.shopec.entity.MemberDepositLog">
+   		INSERT INTO member_deposit_log (
+			id ,
+			created_date ,
+			version ,
+			balance ,
+			credit ,
+			debit ,
+			memo ,
+			type,
+			member_id
+		) VALUES (
+			#{entity.id}, 
+			NOW(), 
+			0, 
+			#{entity.balance}, 
+			#{entity.credit}, 
+			#{entity.debit}, 
+			#{entity.memo}, 
+			#{entity.type}, 
+			#{entity.member.id})
+  	</insert>
+  	
+</mapper>

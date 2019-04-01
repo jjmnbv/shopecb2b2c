@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.shopec.dao.BusinessDepositLogDao">
+
+    <!-- 开启二级缓存 -->
+    <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="net.shopec.entity.BusinessDepositLog">
+	    <result column="id" property="id" />
+	    <result column="version" property="version" />
+        <result column="created_date" property="createdDate" />
+        <result column="last_modified_date" property="lastModifiedDate" />
+        <result column="balance" property="balance" />
+        <result column="credit" property="credit" />
+        <result column="debit" property="debit" />
+        <result column="memo" property="memo" />
+        <result column="type" property="type" />
+        <association property="business" select="net.shopec.dao.BusinessDao.find" column="business_id" fetchType="lazy" javaType="net.shopec.entity.Business"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+   		 id, version, created_date, last_modified_date, balance, credit, debit, memo, type, business_id
+    </sql>
+    
+    <!-- 查找实体对象集合 -->
+	<select id="findSet" resultType="net.shopec.entity.BusinessDepositLog">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`business_deposit_log`
+		WHERE
+			${attributeName } = #{attributeValue}
+	</select>
+	
+    <!-- 查找实体对象分页 -->
+	<select id="selectPage" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`business_deposit_log`
+		<where>
+		  ${ew.sqlSegment}
+		</where>
+	</select>
+	
+	<!-- 查找商家预存款记录分页 -->
+	<select id="findPage" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`business_deposit_log`
+		<where>
+			<if test="business != null">
+				AND business_id = #{business.id}
+			</if>
+		  ${ew.sqlSegment}
+		</where>
+	</select>
+	
+    <!-- 保存 -->
+	<insert id="save" parameterType="net.shopec.entity.BusinessDepositLog">
+   		INSERT INTO business_deposit_log(
+			id ,
+			created_date ,
+			version ,
+			balance ,
+			credit ,
+			debit ,
+			memo ,
+			type ,
+			business_id
+		) VALUES (
+			#{entity.id,}, 
+			NOW(), 
+			0, 
+			#{entity.balance}, 
+			#{entity.credit}, 
+			#{entity.debit}, 
+			#{entity.memo}, 
+			#{entity.type}, 
+			#{entity.business.id})
+  	</insert>
+  	
+</mapper>

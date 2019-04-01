@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.shopec.dao.AdminDao">
+
+    <!-- 开启二级缓存 -->
+    <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>
+	
+	<!-- User查询映射结果 -->
+    <resultMap id="UserResultMap" type="net.shopec.entity.User">
+	    <result column="id" property="id" />
+	    <result column="version" property="version" />
+        <result column="created_date" property="createdDate" />
+        <result column="last_modified_date" property="lastModifiedDate" />
+        <result column="is_enabled" property="isEnabled" />
+        <result column="is_locked" property="isLocked" />
+        <result column="last_login_date" property="lastLoginDate" />
+        <result column="last_login_ip" property="lastLoginIp" />
+        <result column="lock_date" property="lockDate" />
+    </resultMap>
+    
+    <!-- Admin查询映射结果 -->
+    <resultMap id="BaseResultMap" type="net.shopec.entity.Admin" extends="UserResultMap">
+    	<id column="id" property="id" />
+    	<result column="created_date" property="createdDate" />
+		<result column="username" property="username" />
+		<result column="encoded_password" property="encodedPassword" />
+		<result column="email" property="email" />
+		<result column="name" property="name" />
+		<result column="department" property="department" />
+		<collection property="roles" select="net.shopec.dao.RoleDao.findSet" column="{attributeValue=id}" ofType="net.shopec.entity.Role" fetchType="lazy" />
+    </resultMap>
+	
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+    	admin.id ,
+		admin.username ,
+		admin.encoded_password ,
+		admin.email ,
+		admin.name ,
+		admin.department ,
+		users.id ,
+		users.version ,
+		users.created_date ,
+		users.last_modified_date ,
+		users.is_enabled ,
+		users.is_locked ,
+		users.last_login_date ,
+		users.last_login_ip ,
+		users.lock_date
+    </sql>
+	
+	<!-- 查找实体对象 -->
+	<select id="find" parameterType="java.lang.Long" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`admin` admin
+		LEFT JOIN `users` users ON admin.`id` = users.`id`
+		WHERE
+			admin.`id` = #{id}
+	</select>
+	
+	<!-- 查找实体对象集合 -->
+	<select id="findSet" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`admin` admin
+		LEFT JOIN `users` users ON admin.`id` = users.`id`
+		LEFT JOIN `admin_role` ar ON ar.`admins_id` = admin.`id`
+		WHERE
+			ar.roles_id = #{attributeValue}
+	</select>
+	
+	<!-- 根据属性查找实体对象 -->
+	<select id="findByAttribute" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`admin` admin
+		LEFT JOIN `users` users ON admin.`id` = users.`id`
+		WHERE
+			${attributeName} = #{attributeValue}
+	</select>
+	
+	<!-- 查找实体对象分页 -->
+	<select id="selectPage" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`admin` admin
+		LEFT JOIN `users` users ON admin.`id` = users.`id`
+		<where>
+		  ${ew.sqlSegment}
+		</where>
+	</select>
+	
+	<!-- 判断是否存在 -->
+	<select id="exists" resultType="boolean">
+		SELECT
+			count(*)
+		FROM
+			`admin`
+		WHERE
+			${attributeName} = #{attributeValue}
+	</select>
+	
+	<!-- 判断是否唯一 -->
+	<select id="unique" resultType="boolean">
+		SELECT
+			count(*)
+		FROM
+			`admin`
+		WHERE
+			${attributeName } = #{attributeValue}
+		<if test="id != null">
+			AND id != #{id}
+		</if>
+	</select>
+	
+	<!-- 保存 -->
+	<insert id="save" parameterType="net.shopec.entity.Admin">
+		   INSERT INTO admin (
+			id ,
+			department ,
+			email ,
+			encoded_password ,
+			name ,
+			username
+		) VALUES (
+			#{entity.id}, 
+			#{entity.department}, 
+			#{entity.email}, 
+			#{entity.encodedPassword}, 
+			#{entity.name}, 
+			#{entity.username})
+	  </insert>
+  
+  	<!-- 更新 -->
+	<update id="update" parameterType="net.shopec.entity.Admin">
+		UPDATE admin
+		SET department = #{entity.department},
+			email = #{entity.email},
+			encoded_password = #{entity.encodedPassword},
+			name = #{entity.name},
+			username = #{entity.username}
+		WHERE
+			id = #{entity.id}
+	</update>
+	
+</mapper>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.shopec.dao.UserDao">
+
+    <!-- 开启二级缓存 -->
+    <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="net.shopec.entity.User">
+	    <result column="id" property="id" />
+	    <result column="version" property="version" />
+        <result column="created_date" property="createdDate" />
+        <result column="last_modified_date" property="lastModifiedDate" />
+        <result column="is_enabled" property="isEnabled" />
+        <result column="is_locked" property="isLocked" />
+        <result column="last_login_date" property="lastLoginDate" />
+        <result column="last_login_ip" property="lastLoginIp" />
+        <result column="lock_date" property="lockDate" />
+        <collection property="socialUsers" select="net.shopec.dao.SocialUserDao.findSet" column="{attributeName=user_id, attributeValue=id}" ofType="net.shopec.entity.SocialUser" fetchType="lazy"/>
+        <collection property="paymentTransactions" select="net.shopec.dao.PaymentTransactionDao.findSet" column="{attributeName=user_id, attributeValue=id}" ofType="net.shopec.entity.PaymentTransaction" fetchType="lazy"/>
+        <collection property="auditLogs" select="net.shopec.dao.AuditLogDao.findSet" column="{attributeName=user_id, attributeValue=id}" ofType="net.shopec.entity.AuditLog" fetchType="lazy"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+    	id, version, created_date, last_modified_date, is_enabled, is_locked, last_login_date, last_login_ip, lock_date, 'user_id'
+    </sql>
+	
+	<!-- 查找实体对象 -->
+	<select id="find" parameterType="java.lang.Long" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`users` 
+		WHERE
+			`id` = #{id}
+	</select>
+	
+	<!-- 保存 -->
+	<insert id="save" parameterType="net.shopec.entity.User">
+	    INSERT INTO users (
+			id ,
+			created_date ,
+			version ,
+			is_enabled ,
+			is_locked ,
+			last_login_date ,
+			last_login_ip ,
+			lock_date
+		) VALUES (
+			#{entity.id}, 
+			NOW(), 
+			0, 
+			#{entity.isEnabled}, 
+			#{entity.isLocked}, 
+			#{entity.lastLoginDate}, 
+			#{entity.lastLoginIp}, 
+			#{entity.lockDate})
+	</insert>
+  	
+  	<!-- 更新 -->
+  	<update id="update" parameterType="net.shopec.entity.User">
+   		UPDATE users
+		SET last_modified_date = NOW(),
+			version = #{entity.version} + 1,
+			is_enabled = #{entity.isEnabled},
+			is_locked = #{entity.isLocked},
+			last_login_date = #{entity.lastLoginDate},
+			last_login_ip = #{entity.lastLoginIp},
+			lock_date = #{entity.lockDate}
+		WHERE
+			id = #{entity.id}
+  	</update>
+  
+</mapper>

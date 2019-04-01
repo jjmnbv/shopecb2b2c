@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.shopec.dao.BrandDao">
+
+    <!-- 开启二级缓存 -->
+    <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="net.shopec.entity.Brand">
+	    <result column="id" property="id" />
+	    <result column="version" property="version" />
+        <result column="created_date" property="createdDate" />
+        <result column="last_modified_date" property="lastModifiedDate" />
+        <result column="orders" property="order" />
+        <result column="introduction" property="introduction" />
+        <result column="logo" property="logo" />
+        <result column="name" property="name" />
+        <result column="type" property="type" />
+        <result column="url" property="url" />
+        <collection property="products" select="net.shopec.dao.ProductDao.findSet" column="{attributeName=brand_id, attributeValue=id}" ofType="net.shopec.entity.Product" fetchType="lazy"/>
+        <collection property="productCategories" select="net.shopec.dao.ProductCategoryDao.findSet" column="{attributeName=brand_id, attributeValue=id}" ofType="net.shopec.entity.ProductCategory" fetchType="lazy"/>
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+       DISTINCT id, version, created_date, last_modified_date, orders, introduction, logo, name, type, url, 'brand_id'
+    </sql>
+	
+	<!-- 查找实体对象 -->
+	<select id="find" parameterType="java.lang.Long" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`brand` 
+		WHERE
+			`id` = #{id}
+	</select>
+	
+	<!-- 查找实体对象集合 -->
+	<select id="findSet" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`brand`
+		LEFT JOIN `product_category_brand` ON id = brands_id
+		WHERE
+			product_categories_id = #{attributeValue}
+	</select>
+	
+	<!-- 查找所有实体对象集合 -->
+	<select id="findAll" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`brand` 
+	</select>
+	
+	<!-- 查找品牌 -->
+	<select id="findList" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List"></include>
+		FROM
+			`brand`
+		LEFT JOIN `product_category_brand` ON id = brands_id
+		<where>
+			<if test="productCategory != null">
+				product_categories_id = #{productCategory.id}
+			</if>
+			${ew.sqlSegment}
+		</where>
+	</select>
+	
+	<!-- 保存 -->
+	<insert id="save" parameterType="net.shopec.entity.Brand">
+    	INSERT INTO brand(
+			id ,
+			created_date ,
+			version ,
+			orders ,
+			logo ,
+			name ,
+			type ,
+			url ,
+			introduction
+		)
+		VALUES (
+			#{entity.id}, 
+			#{entity.createdDate}, 
+			#{entity.version}, 
+			#{entity.order}, 
+			#{entity.logo}, 
+			#{entity.name}, 
+			#{entity.type}, 
+			#{entity.url}, 
+			#{entity.introduction}
+		)
+  	</insert>
+	
+	<!-- 更新 -->
+	<update id="update" parameterType="net.shopec.entity.Brand">
+    	UPDATE brand
+		SET last_modified_date = #{entity.lastModifiedDate},
+			version = #{entity.version} + 1,
+			orders = #{entity.order},
+			logo = #{entity.logo},
+			name = #{entity.name},
+			type = #{entity.type},
+			url = #{entity.url},
+			introduction = #{entity.introduction}
+		WHERE
+			id = #{entity.id}
+		AND version = #{entity.version}
+  	</update>
+	
+</mapper>

@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="net.shopec.dao.PluginConfigDao">
+
+    <!-- 开启二级缓存 -->
+    <cache type="org.mybatis.caches.ehcache.LoggingEhcache"/>
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="net.shopec.entity.PluginConfig">
+	    <result column="id" property="id" />
+	    <result column="version" property="version" />
+        <result column="created_date" property="createdDate" />
+        <result column="last_modified_date" property="lastModifiedDate" />
+        <result column="orders" property="order" />
+        <result column="is_enabled" property="isEnabled" />
+        <result column="plugin_id" property="pluginId" />
+        <result column="attributes" property="attributes" jdbcType="LONGVARCHAR"
+				javaType="java.util.HashMap" typeHandler="net.shopec.handlers.MyMapTypeHandler" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+    	id, version, created_date, last_modified_date, orders, attributes, is_enabled, plugin_id
+    </sql>
+	
+	<!-- 根据插件ID查找插件配置 -->
+	<select id="findByPluginId" resultMap="BaseResultMap">
+		SELECT
+			<include refid="Base_Column_List" />
+		FROM
+			`plugin_config`
+		WHERE
+			plugin_id = #{pluginId}
+	</select>
+	
+	<!-- 判断是否存在 -->
+	<select id="exists" resultType="boolean">
+		SELECT
+			COUNT(1)
+		FROM
+			`plugin_config`
+		WHERE
+			${attributeName } = #{attributeValue}
+	</select>
+	
+	<!-- 保存 -->
+	<insert id="save" parameterType="net.shopec.entity.PluginConfig">
+    	INSERT INTO plugin_config(
+			id ,
+			created_date ,
+			version ,
+			orders ,
+			is_enabled ,
+			plugin_id ,
+			attributes
+		)
+		VALUES (
+			#{entity.id}, 
+			#{entity.createdDate}, 
+			#{entity.version}, 
+			#{entity.order},
+			#{entity.isEnabled}, 
+			#{entity.pluginId}, 
+			#{entity.attributes, typeHandler=net.shopec.handlers.MyMapTypeHandler}
+		)
+  	</insert>
+  	
+	 <!-- 更新实体对象 -->
+  	 <update id="update" parameterType="net.shopec.entity.PluginConfig">
+	    UPDATE `plugin_config`
+	    SET
+	        `last_modified_date` = #{entity.lastModifiedDate},
+	        `version` = #{entity.version} + 1,
+	        `orders` = #{entity.order} ,
+	        `is_enabled` = #{entity.isEnabled} , 
+	        `plugin_id` = #{entity.pluginId} , 
+	        `attributes` = #{entity.attributes, typeHandler=net.shopec.handlers.MyMapTypeHandler}
+	    WHERE
+			`id` = #{entity.id}
+		AND `version` = #{entity.version}
+	  </update>
+
+	<!-- 移除 -->
+	<update id="remove">
+		DELETE FROM plugin_config WHERE id = #{entity.id}
+	</update>
+
+</mapper>
